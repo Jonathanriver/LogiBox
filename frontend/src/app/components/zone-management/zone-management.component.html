@@ -1,0 +1,178 @@
+<div class="zone-management" [class.driver-view]="!canManage">
+  <section class="zone-map-column">
+    <div #mapCanvas class="zone-map" aria-label="Mapa interactivo de zonas y ubicaciones de pedidos"></div>
+    <div class="map-legend">
+      <strong>Estado de pedidos</strong>
+      <span><i class="legend-dot pending-dot"></i>Pendiente</span>
+      <span><i class="legend-dot delivered-dot"></i>Entregado</span>
+      <small>{{ isDrawingZone ? 'Haz clic para añadir vértices' : isPickingOrderPoint ? 'Haz clic dentro de la zona para fijar la ubicación' : 'Mapa vectorial · OpenFreeMap' }}</small>
+    </div>
+    <div class="map-instruction" *ngIf="canManage && !zones.length && !isLoading">
+      Dibuja un polígono en el mapa para delimitar tu primera zona.
+    </div>
+  </section>
+
+  <aside class="zone-sidebar">
+    <header class="zone-header">
+      <div>
+        <span class="eyebrow">{{ canManage ? 'ADMINISTRACIÓN' : 'TU ASIGNACIÓN' }}</span>
+        <h1>Gestión de Zonas</h1>
+        <p>{{ canManage ? 'Administra cobertura, vehículos y pedidos.' : 'Consulta las zonas y pedidos de tu ruta.' }}</p>
+      </div>
+      <span class="zone-total">{{ zones.length }} zonas</span>
+    </header>
+
+    <section *ngIf="canManage && isDrawingZone" class="drawing-panel">
+      <strong>Dibuja el perímetro en el mapa</strong>
+      <span>{{ draftPoints.length }} vértices · mínimo 3</span>
+      <button type="button" class="primary-action" (click)="finishZoneDrawing()" [disabled]="draftPoints.length < 3">Confirmar límites</button>
+      <button type="button" class="secondary-button" (click)="cancelZoneDrawing()">Cancelar dibujo</button>
+    </section>
+
+    <button *ngIf="canManage && !isDrawingZone" type="button" class="primary-action" (click)="beginZoneDrawing()" [disabled]="isSavingZone">
+      <span aria-hidden="true">＋</span> Nueva Zona
+    </button>
+
+    <label *ngIf="canManage" class="search-field">
+      <span aria-hidden="true">⌕</span>
+      <input type="search" [(ngModel)]="search" placeholder="Buscar zona, conductor o pedido..." />
+    </label>
+
+    <div class="feedback error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+    <div class="feedback success" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+    <div class="zone-list-heading">
+      <h2>{{ canManage ? 'Zonas Configuradas' : 'Zonas Asignadas' }}</h2>
+      <span>{{ totalOrders }} pedidos</span>
+    </div>
+
+    <div *ngIf="isLoading" class="empty-state">Cargando zonas...</div>
+    <div *ngIf="!isLoading && !filteredZones.length" class="empty-state">
+      {{ canManage ? 'Aún no hay zonas. Dibuja una en el mapa.' : 'No tienes una zona asignada.' }}
+    </div>
+
+    <div class="zone-list" *ngIf="!isLoading">
+      <button
+        *ngFor="let zone of filteredZones; trackBy: trackZone"
+        type="button"
+        class="zone-card"
+        [class.selected]="selectedZoneId === zone.id"
+        [style.--zone-color]="zone.color"
+        (click)="selectZone(zone.id)">
+        <span class="zone-card-top">
+          <span class="zone-card-name">
+            <i class="zone-color-swatch" [style.backgroundColor]="zone.color" aria-hidden="true"></i>
+            <strong>{{ zone.name }}</strong>
+          </span>
+          <span class="zone-card-count">{{ zone.orders.length }}/200</span>
+        </span>
+        <span class="zone-card-meta">{{ zone.driver.name }} · {{ zone.vehicle.plate }}</span>
+        <span class="zone-card-meta">{{ zone.vehicle.model }}</span>
+        <span class="zone-card-stats">
+          <span>Pedidos</span><strong>{{ zone.orders.length }} ubicaciones</strong>
+        </span>
+        <span class="zone-card-stats">
+          <span>Conductor</span><strong>{{ zone.driver.email }}</strong>
+        </span>
+      </button>
+    </div>
+
+    <section class="selected-zone-panel" *ngIf="selectedZone as zone">
+      <header class="selected-zone-heading">
+        <div>
+          <span class="eyebrow">PEDIDOS DE LA ZONA</span>
+          <h2>{{ zone.name }}</h2>
+        </div>
+        <span class="order-counter">{{ zone.orders.length }}/200</span>
+      </header>
+
+      <div class="zone-manager-actions" *ngIf="canManage">
+        <button type="button" class="zone-edit-button" (click)="editSelectedZone()">Editar zona</button>
+        <button type="button" class="zone-delete-button" (click)="deleteSelectedZone()" [disabled]="isSavingZone">Eliminar zona</button>
+      </div>
+
+      <div class="assigned-driver">
+        <strong>{{ zone.driver.name }}</strong>
+        <span>{{ zone.vehicle.model }} · {{ zone.vehicle.plate }}</span>
+      </div>
+
+      <div class="order-list">
+        <article *ngFor="let order of zone.orders; trackBy: trackOrder" class="order-row" [class.order-done]="order.status === 'delivered'">
+          <span class="order-number">{{ order.orderNumber }}</span>
+          <span class="order-description">
+            <strong>{{ order.description }}</strong>
+            <small>{{ order.latitude | number:'1.5-5' }}, {{ order.longitude | number:'1.5-5' }}</small>
+          </span>
+          <button
+            *ngIf="!canManage"
+            type="button"
+            class="order-status-button"
+            [attr.aria-label]="order.status === 'delivered' ? 'Marcar pedido pendiente' : 'Marcar pedido entregado'"
+            (click)="updateOrderStatus(order)">
+            {{ order.status === 'delivered' ? '✓' : 'Marcar' }}
+          </button>
+          <span *ngIf="canManage" class="order-state" [class.complete]="order.status === 'delivered'">
+            {{ order.status === 'delivered' ? 'Entregado' : 'Pendiente' }}
+          </span>
+        </article>
+        <p *ngIf="!zone.orders.length" class="orders-empty">Todavía no hay pedidos en esta zona.</p>
+      </div>
+
+      <section *ngIf="canAddOrder" class="add-order-panel">
+        <h3>Agregar ubicación</h3>
+        <label>
+          <span>Pedido / referencia</span>
+          <input [(ngModel)]="orderDraft.description" maxlength="180" placeholder="Ej. Entrega cliente 041" />
+        </label>
+        <button type="button" class="map-pick-button" [class.picking]="isPickingOrderPoint" (click)="beginOrderPointSelection()">
+          {{ isPickingOrderPoint ? 'Selecciona el punto en el mapa' : '⌖ Elegir punto en el mapa' }}
+        </button>
+        <div class="coordinate-inputs">
+          <label><span>Latitud</span><input type="number" step="any" [(ngModel)]="orderDraft.latitude" placeholder="4.625000" /></label>
+          <label><span>Longitud</span><input type="number" step="any" [(ngModel)]="orderDraft.longitude" placeholder="-74.070000" /></label>
+        </div>
+        <button type="button" class="save-order-button" (click)="addOrder()" [disabled]="isSavingOrder || zone.orders.length >= 200">
+          {{ isSavingOrder ? 'Guardando...' : 'Guardar pedido #' + (zone.orders.length + 1) }}
+        </button>
+      </section>
+    </section>
+
+    <footer class="zone-footer" *ngIf="canManage">
+      <span>Máximo 200 pedidos numerados por zona</span>
+      <span>Pedidos fuera del polígono no se guardan</span>
+    </footer>
+  </aside>
+
+  <div class="dialog-backdrop" *ngIf="showZoneDialog">
+    <form class="zone-dialog" (ngSubmit)="saveZone()">
+      <header>
+        <span class="eyebrow">{{ editingZoneId ? 'EDITAR COBERTURA' : 'NUEVA COBERTURA' }}</span>
+        <h2>{{ editingZoneId ? 'Editar zona' : 'Configurar zona' }}</h2>
+        <p>El polígono queda asociado al conductor y su vehículo.</p>
+      </header>
+      <button *ngIf="editingZoneId" type="button" class="map-pick-button" (click)="redrawZoneBoundary()">Redibujar límites en el mapa</button>
+      <label>
+        <span>Nombre de zona</span>
+        <input name="zoneName" [(ngModel)]="zoneDraft.name" maxlength="120" required placeholder="Ej. Zona Norte - Chapinero" />
+      </label>
+      <label>
+        <span>Conductor asignado</span>
+        <select name="driver" [ngModel]="zoneDraft.driverId" (ngModelChange)="selectDriver($event ? +$event : null)" required>
+          <option [ngValue]="null" disabled>Selecciona un conductor</option>
+          <option *ngFor="let driver of drivers" [ngValue]="driver.id">{{ driver.name }} · {{ driver.email }}</option>
+        </select>
+      </label>
+      <div class="coordinate-inputs">
+        <label><span>Placa</span><input name="plate" [(ngModel)]="zoneDraft.vehiclePlate" maxlength="16" required placeholder="ABC-123" /></label>
+        <label><span>Vehículo</span><input name="model" [(ngModel)]="zoneDraft.vehicleModel" maxlength="120" required placeholder="Van NHR" /></label>
+      </div>
+      <p class="dialog-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <footer>
+        <button type="button" class="secondary-button" (click)="cancelZoneDraft()">Cancelar</button>
+        <button type="submit" class="save-order-button" [disabled]="isSavingZone || !drivers.length">
+          {{ isSavingZone ? 'Guardando...' : 'Guardar zona' }}
+        </button>
+      </footer>
+    </form>
+  </div>
+</div>

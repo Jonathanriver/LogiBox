@@ -1,0 +1,307 @@
+<div class="bulk-upload-container">
+  <!-- ENCABEZADO PRINCIPAL -->
+  <header class="bulk-header">
+    <div class="header-titles">
+      <span class="eyebrow">DISTRIBUCIÓN Y RUTAS</span>
+      <h1>Carga Masiva de Pedidos</h1>
+      <p>Sube archivos Excel (.xlsx) o CSV. Cada pedido se clasifica y numera automáticamente dentro de su zona según sus coordenadas.</p>
+    </div>
+    <div class="header-actions">
+      <button 
+        type="button" 
+        class="btn-template" 
+        (click)="downloadTemplate()" 
+        [disabled]="isDownloadingTemplate"
+        title="Descargar plantilla de Excel preformateada">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span>{{ isDownloadingTemplate ? 'Descargando...' : 'Descargar Plantilla Excel' }}</span>
+      </button>
+
+      <button 
+        type="button" 
+        class="btn-sample" 
+        (click)="loadSampleData()" 
+        [disabled]="isLoading || isImporting"
+        title="Probar de inmediato con pedidos de prueba en Bogotá">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+        <span>Cargar Ejemplo Rápido</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MENSAJES DE ALERTA -->
+  <div class="alert-box error" *ngIf="errorMessage" role="alert">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <span>{{ errorMessage }}</span>
+  </div>
+
+  <!-- PANTALLA DE ÉXITO TRAS IMPORTACIÓN -->
+  <section class="success-card" *ngIf="importResultSummary">
+    <div class="success-icon-wrap">
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+    <h2>¡Carga Masiva Exitosa!</h2>
+    <p class="success-desc">{{ successMessage }}</p>
+
+    <div class="imported-zones-grid">
+      <div *ngFor="let zoneResult of importResultSummary.byZone" class="imported-zone-item">
+        <strong>{{ zoneResult.zoneName }}</strong>
+        <span class="imported-badge">+{{ zoneResult.importedCount }} pedidos agregados</span>
+        <small>Total en zona: {{ zoneResult.totalOrdersNow }}/200</small>
+      </div>
+    </div>
+
+    <div class="success-actions">
+      <button type="button" class="btn-primary-action" (click)="goToZones()">
+        Ver Zonas y Mapa de Entregas →
+      </button>
+      <button type="button" class="btn-secondary-action" (click)="resetUpload()">
+        Subir Otro Archivo
+      </button>
+    </div>
+  </section>
+
+  <!-- ZONA DE CARGA (DRAG & DROP) CUANDO NO HAY PREVIEW NI ÉXITO -->
+  <section 
+    *ngIf="!previewData && !importResultSummary" 
+    class="upload-dropzone" 
+    [class.dragging]="isDragging"
+    [class.loading]="isLoading"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)">
+    
+    <input 
+      type="file" 
+      #fileInput 
+      (change)="onFileInputChange($event)" 
+      accept=".xlsx, .xls, .csv" 
+      class="file-input-hidden" 
+    />
+
+    <div class="dropzone-content" *ngIf="!isLoading">
+      <div class="file-icon-circle">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1743B5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="12" y1="18" x2="12" y2="12"></line>
+          <polyline points="9 15 12 12 15 15"></polyline>
+        </svg>
+      </div>
+      <h3>Arrastra tu archivo Excel o CSV aquí</h3>
+      <p>o haz clic en el botón para buscar en tu equipo</p>
+
+      <button type="button" class="btn-browse" (click)="fileInput.click()">
+        Examinar Archivos
+      </button>
+
+      <div class="dropzone-hints">
+        <span>Formatos admitidos: <strong>.xlsx, .xls, .csv</strong></span>
+        <span>Compatible con: <strong>Formato oficial LOGIBOX (42 columnas) y archivos estándar</strong></span>
+      </div>
+    </div>
+
+    <div class="loading-state" *ngIf="isLoading">
+      <div class="spinner"></div>
+      <h3>Procesando archivo...</h3>
+      <p>Calculando intersecciones con los polígonos de zonas activas</p>
+    </div>
+  </section>
+
+  <!-- SECCIÓN DE PREVISUALIZACIÓN Y CLASIFICACIÓN -->
+  <section class="preview-section" *ngIf="previewData">
+    <!-- BARRA DE RESUMEN / MÉTRICAS -->
+    <div class="metrics-grid">
+      <div class="metric-card total">
+        <span class="metric-num">{{ previewData.summary.total }}</span>
+        <span class="metric-label">Total Pedidos</span>
+      </div>
+      <div class="metric-card matched">
+        <span class="metric-num">{{ matchedCount }}</span>
+        <span class="metric-label">Asignados a Zonas</span>
+      </div>
+      <div class="metric-card unassigned">
+        <span class="metric-num">{{ unassignedCount }}</span>
+        <span class="metric-label">Fuera de Zona</span>
+      </div>
+      <div class="metric-card errors" *ngIf="errorCount > 0">
+        <span class="metric-num">{{ errorCount }}</span>
+        <span class="metric-label">Con Errores</span>
+      </div>
+    </div>
+
+    <!-- DISTRIBUCIÓN POR ZONA -->
+    <div class="zones-distribution" *ngIf="activeZonesSummary.length > 0">
+      <h3>Distribución por Zona Detectada:</h3>
+      <div class="zones-cards-grid">
+        <div 
+          *ngFor="let zoneSummary of activeZonesSummary" 
+          class="zone-summary-card"
+          [style.borderLeftColor]="zoneSummary.zoneColor">
+          <div class="zone-summary-header">
+            <span class="zone-name">
+              <i class="zone-bullet" [style.backgroundColor]="zoneSummary.zoneColor"></i>
+              <strong>{{ zoneSummary.zoneName }}</strong>
+            </span>
+            <span class="zone-new-count">+{{ zoneSummary.newOrdersCount }}</span>
+          </div>
+          <div class="zone-meta">
+            <span>🚛 {{ zoneSummary.driverName }} · {{ zoneSummary.vehiclePlate }}</span>
+          </div>
+          <div class="zone-capacity-bar">
+            <div 
+              class="capacity-fill" 
+              [style.width.%]="((zoneSummary.currentOrdersCount + zoneSummary.newOrdersCount) / zoneSummary.capacityLimit) * 100"
+              [style.backgroundColor]="zoneSummary.zoneColor">
+            </div>
+          </div>
+          <small class="capacity-text">
+            Total proyectado: {{ zoneSummary.currentOrdersCount + zoneSummary.newOrdersCount }}/{{ zoneSummary.capacityLimit }}
+          </small>
+        </div>
+      </div>
+    </div>
+
+    <!-- AVISO DE PEDIDOS FUERA DE ZONA -->
+    <div class="warning-banner" *ngIf="unassignedCount > 0">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+        <line x1="12" y1="9" x2="12" y2="13"></line>
+        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+      </svg>
+      <div>
+        <strong>{{ unassignedCount }} pedidos fuera de cobertura geográfica</strong>
+        <p>Estos pedidos no coinciden con ningún polígono de las zonas activas. Solo se importarán los {{ matchedCount }} pedidos clasificados.</p>
+      </div>
+    </div>
+
+    <!-- TABLA DE PEDIDOS CON FILTROS -->
+    <div class="table-container">
+      <div class="table-header-row">
+        <div class="filter-tabs">
+          <button 
+            type="button" 
+            class="tab-btn" 
+            [class.active]="activeFilter === 'all'" 
+            (click)="activeFilter = 'all'">
+            Todos ({{ previewData.summary.total }})
+          </button>
+          <button 
+            type="button" 
+            class="tab-btn" 
+            [class.active]="activeFilter === 'matched'" 
+            (click)="activeFilter = 'matched'">
+            Asignados ({{ matchedCount }})
+          </button>
+          <button 
+            type="button" 
+            class="tab-btn" 
+            [class.active]="activeFilter === 'unassigned'" 
+            (click)="activeFilter = 'unassigned'">
+            Fuera de Zona ({{ unassignedCount }})
+          </button>
+          <button 
+            type="button" 
+            class="tab-btn" 
+            *ngIf="errorCount > 0"
+            [class.active]="activeFilter === 'error'" 
+            (click)="activeFilter = 'error'">
+            Con Error ({{ errorCount }})
+          </button>
+        </div>
+        <span class="file-name-tag" *ngIf="selectedFile">Archivo: {{ selectedFile.name }}</span>
+      </div>
+
+      <div class="table-scroll">
+        <table class="orders-preview-table">
+          <thead>
+            <tr>
+              <th>Fila</th>
+              <th>Orden / Guía</th>
+              <th>Cliente & Teléfono</th>
+              <th>Dirección & Municipio</th>
+              <th>Coordenadas</th>
+              <th>Zona Asignada</th>
+              <th>Conductor & Vehículo</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of filteredOrders" [class.error-row]="order.status === 'error'" [class.unassigned-row]="order.status === 'unassigned'">
+              <td class="col-index">#{{ order.rowIndex }}</td>
+              <td class="col-order-id">
+                <strong *ngIf="order.extraData?.['orderNumber']">{{ order.extraData?.['orderNumber'] }}</strong>
+                <strong *ngIf="!order.extraData?.['orderNumber']">{{ order.description }}</strong>
+                <small *ngIf="order.extraData?.['trackingNumber']">TN: {{ order.extraData?.['trackingNumber'] }}</small>
+              </td>
+              <td class="col-customer">
+                <span class="cust-name">{{ order.extraData?.['customer'] || order.description }}</span>
+                <small *ngIf="order.extraData?.['phone']" class="cust-phone">📞 {{ order.extraData?.['phone'] }}</small>
+              </td>
+              <td class="col-address">
+                <span class="addr-text">{{ order.extraData?.['address'] || '--' }}</span>
+                <span *ngIf="order.extraData?.['municipality']" class="muni-badge">📍 {{ order.extraData?.['municipality'] }}</span>
+              </td>
+              <td class="col-coords">
+                {{ order.latitude | number:'1.5-5' }}, {{ order.longitude | number:'1.5-5' }}
+              </td>
+              <td class="col-zone">
+                <span *ngIf="order.zoneName && order.status === 'matched'" class="zone-pill" [style.backgroundColor]="order.zoneColor">
+                  {{ order.zoneName }}
+                </span>
+                <span *ngIf="order.status === 'unassigned'" class="zone-pill-unassigned">
+                  Fuera de cobertura
+                </span>
+                <span *ngIf="order.status === 'error'" class="zone-pill-error">
+                  Inválido
+                </span>
+              </td>
+              <td class="col-driver">
+                <span *ngIf="order.driverName">{{ order.driverName }} ({{ order.vehiclePlate }})</span>
+                <span *ngIf="!order.driverName" class="text-muted">--</span>
+              </td>
+              <td class="col-status">
+                <span *ngIf="order.status === 'matched'" class="badge-matched">✓ Clasificado</span>
+                <span *ngIf="order.status === 'unassigned'" class="badge-unassigned">⚠ Sin zona</span>
+                <span *ngIf="order.status === 'error'" class="badge-error">✕ Error</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- BARRA FLOTANTE DE ACCIONES -->
+    <div class="action-footer">
+      <button 
+        type="button" 
+        class="btn-cancel" 
+        (click)="resetUpload()" 
+        [disabled]="isImporting">
+        Cancelar / Cambiar Archivo
+      </button>
+
+      <button 
+        type="button" 
+        class="btn-confirm-import" 
+        (click)="confirmImport()" 
+        [disabled]="isImporting || matchedCount === 0">
+        <span *ngIf="!isImporting">🚀 Confirmar e Importar {{ matchedCount }} Pedidos</span>
+        <span *ngIf="isImporting">Guardando en base de datos...</span>
+      </button>
+    </div>
+  </section>
+</div>
+

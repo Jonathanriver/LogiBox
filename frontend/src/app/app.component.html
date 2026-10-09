@@ -1,0 +1,470 @@
+<div class="logistics-layout">
+  <!-- SIDEBAR IZQUIERDO (Visible únicamente cuando el usuario ha iniciado sesión) -->
+  <aside class="sidebar" *ngIf="authService.isLoggedIn()">
+    <!-- Branding Superior -->
+    <div class="sidebar-brand">
+      <div class="brand-cube-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="12,2 22,7 12,12 2,7" fill="#0284C7"/>
+          <polygon points="2,7 12,12 12,22 2,17" fill="#0369A1"/>
+          <polygon points="12,12 22,7 22,17 12,22" fill="#0B2D86"/>
+        </svg>
+      </div>
+      <span class="brand-name">LOGIBOX</span>
+    </div>
+
+    <!-- Navegación Principal -->
+    <nav class="sidebar-nav">
+      <!-- 1. Dashboard -->
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeNav === 'Dashboard'" 
+        (click)="setActiveNav('Dashboard')"
+      >
+        <span class="nav-icon">
+          <!-- Icono Cuadrícula / Dashboard -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+        </span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+
+      <!-- 2. Pedidos -->
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeNav === 'Pedidos'" 
+        (click)="setActiveNav('Pedidos')"
+      >
+        <span class="nav-icon">
+          <!-- Icono Caja / Paquete -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        </span>
+        <span class="nav-label">Pedidos</span>
+      </button>
+
+      <!-- 3. Mapa de Entregas -->
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeNav === 'Mapa de Entregas'" 
+        (click)="setActiveNav('Mapa de Entregas')"
+      >
+        <span class="nav-icon">
+          <!-- Icono Mapa -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+            <line x1="8" y1="2" x2="8" y2="18"></line>
+            <line x1="16" y1="6" x2="16" y2="22"></line>
+          </svg>
+        </span>
+        <span class="nav-label">Mapa de Entregas</span>
+      </button>
+
+      <!-- 4. Gestión de Zonas -->
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeNav === 'Gestión de Zonas'" 
+        (click)="setActiveNav('Gestión de Zonas')"
+      >
+        <span class="nav-icon">
+          <!-- Icono Pin de Ubicación -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+        </span>
+        <span class="nav-label">Gestión de Zonas</span>
+      </button>
+
+      <!-- 5. Carga Masiva -->
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeNav === 'Carga Masiva'" 
+        (click)="setActiveNav('Carga Masiva')"
+      >
+        <span class="nav-icon">
+          <!-- Icono Archivo con Flecha -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="12" y1="18" x2="12" y2="12"></line>
+            <polyline points="9 15 12 12 15 15"></polyline>
+          </svg>
+        </span>
+        <span class="nav-label">Carga Masiva</span>
+      </button>
+
+      <!-- 6. Historial -->
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeNav === 'Historial'" 
+        (click)="setActiveNav('Historial')"
+      >
+        <span class="nav-icon">
+          <!-- Icono Reloj / Historial -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <polyline points="3 3 3 8 8 8"></polyline>
+            <polyline points="12 7 12 12 15 15"></polyline>
+          </svg>
+        </span>
+        <span class="nav-label">Historial</span>
+      </button>
+    </nav>
+
+    <!-- Navegación Inferior (Perfil) -->
+    <div class="sidebar-footer">
+      <button 
+        type="button" 
+        class="nav-item" 
+        [class.active]="activeNav === 'Perfil'" 
+        (click)="setActiveNav('Perfil')"
+      >
+        <span class="nav-icon">
+          <!-- Icono Perfil / Usuario -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+        </span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- CONTENEDOR PRINCIPAL DERECHO -->
+  <div class="content-wrapper">
+    <!-- HEADER SUPERIOR -->
+    <header class="top-header">
+      <div class="header-left">
+        <h2 class="header-title">Logistics Control Center</h2>
+      </div>
+
+      <div class="header-right">
+        <!-- Botón Notificaciones con punto rojo -->
+        <div class="notification-box">
+          <button type="button" class="btn-icon" (click)="toggleNotifications()" title="Notificaciones">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E293B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+            <span class="red-dot-badge"></span>
+          </button>
+
+          <!-- Dropdown Notificaciones -->
+          <div class="dropdown-panel" *ngIf="showNotifications">
+            <div class="dropdown-header">
+              <h4>Notificaciones</h4>
+              <span class="badge-count">3 nuevas</span>
+            </div>
+            <ul class="dropdown-list">
+              <li *ngFor="let n of notifications" class="dropdown-item" [class.unread]="!n.read">
+                <span class="notif-title">{{ n.title }}</span>
+                <span class="notif-time">{{ n.time }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Avatar Usuario Circular Azul Oscuro -->
+        <div class="avatar-box">
+          <button type="button" class="avatar-circle" (click)="toggleProfileDropdown()" title="Perfil de usuario">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+          </button>
+
+          <!-- Dropdown Perfil / Sesión -->
+          <div class="dropdown-panel profile-menu" *ngIf="showProfileDropdown">
+            <div *ngIf="authService.currentUser() as user" class="profile-summary">
+              <div class="profile-name">{{ user.name }}</div>
+              <div class="profile-role">{{ user.roleLabel }}</div>
+              <div class="profile-email">{{ user.email }}</div>
+              <div *ngIf="user.vehicle" class="profile-vehicle">🚛 {{ user.vehicle }}</div>
+              <hr class="profile-sep" />
+              <button type="button" class="btn-logout" (click)="logout()">
+                Cerrar Sesión
+              </button>
+            </div>
+            <div *ngIf="!authService.currentUser()" class="profile-summary">
+              <p class="profile-email">No has iniciado sesión aún.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ÁREA DE CONTENIDO PRINCIPAL -->
+    <main class="main-body">
+      <!-- VISTA 1: PANTALLA DE LOGIN IDÉNTICA A LA IMAGEN (Si no está autenticado) -->
+      <section *ngIf="!authService.isLoggedIn()" class="view-login-container">
+        <app-login (loginSuccess)="onUserLoggedIn($event)"></app-login>
+      </section>
+
+      <ng-container *ngIf="authService.isLoggedIn() && (activeNav === 'Gestión de Zonas' || activeNav === 'Mapa de Entregas')">
+        @defer {
+          <section class="zone-screen">
+            <app-zone-management [canManage]="isCoordinator"></app-zone-management>
+          </section>
+        } @placeholder {
+          <section class="zone-loading">Cargando el mapa de zonas...</section>
+        }
+      </ng-container>
+
+      <section *ngIf="authService.isLoggedIn() && isCoordinator && activeNav === 'Carga Masiva'" class="bulk-screen">
+        <app-bulk-upload (navigateToZones)="setActiveNav('Gestión de Zonas')"></app-bulk-upload>
+      </section>
+
+      <section *ngIf="authService.isLoggedIn() && isCoordinator && activeNav === 'Dashboard'" class="admin-dashboard">
+        <div class="admin-metrics">
+          <article class="metric-panel metric-deliveries">
+            <div class="metric-copy">
+              <span class="metric-label">ENTREGAS DEL DÍA</span>
+              <strong class="metric-value">{{ items.length | number }}</strong>
+              <span class="metric-footnote positive">{{ completedItemsCount }} completadas</span>
+            </div>
+            <span class="metric-symbol" aria-hidden="true">▣</span>
+            <span class="metric-target">Pendientes: {{ pendingItemsCount }}</span>
+          </article>
+          <article class="metric-panel metric-efficiency">
+            <div class="metric-copy">
+              <span class="metric-label">EFICIENCIA DE RUTAS</span>
+              <strong class="metric-value">{{ routeEfficiency }}%</strong>
+              <span class="metric-footnote">Calculada sobre entregas completadas</span>
+            </div>
+            <span class="metric-symbol" aria-hidden="true">⌁</span>
+            <span class="metric-target">{{ completedItemsCount }} de {{ items.length }} entregas</span>
+          </article>
+          <article class="metric-panel metric-time">
+            <div class="metric-copy">
+              <span class="metric-label">TIEMPO PROMEDIO</span>
+              <strong class="metric-value">--<small> min</small></strong>
+              <span class="metric-footnote">Sin mediciones registradas</span>
+            </div>
+            <span class="metric-symbol" aria-hidden="true">◷</span>
+            <span class="metric-target">Requiere datos de ruta</span>
+          </article>
+        </div>
+
+        <div class="admin-content-grid">
+          <section class="activity-panel">
+            <div class="panel-heading">
+              <div>
+                <h3>Actividad Reciente</h3>
+                <p>Volumen de entregas por hora vs. capacidad proyectada</p>
+              </div>
+              <span class="period-pill">Hoy</span>
+            </div>
+            <div class="activity-chart" role="img" aria-label="Gráfica ilustrativa de actividad de entregas durante el día">
+              <div class="chart-y-labels" aria-hidden="true">
+                <span>500</span><span>375</span><span>250</span><span>125</span><span>0</span>
+              </div>
+              <svg viewBox="0 0 720 300" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <linearGradient id="activityFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#2448bd" stop-opacity="0.24" />
+                    <stop offset="100%" stop-color="#2448bd" stop-opacity="0.02" />
+                  </linearGradient>
+                </defs>
+                <path class="chart-gridline" d="M0 20H720 M0 82H720 M0 145H720 M0 207H720 M0 270H720" />
+                <path class="chart-area" d="M0 230 C90 210 125 165 210 112 S330 72 370 92 S460 145 530 180 S630 202 720 160 L720 270 L0 270 Z" />
+                <path class="chart-line" d="M0 230 C90 210 125 165 210 112 S330 72 370 92 S460 145 530 180 S630 202 720 160" />
+                <circle class="chart-point" cx="225" cy="105" r="6" />
+                <circle class="chart-point" cx="370" cy="92" r="6" />
+                <circle class="chart-point" cx="585" cy="191" r="6" />
+              </svg>
+              <div class="chart-x-labels" aria-hidden="true">
+                <span>08:00</span><span>12:00</span><span>16:00</span><span>20:00</span>
+              </div>
+            </div>
+          </section>
+
+          <aside class="zones-panel">
+            <div class="zones-heading">
+              <h3>Gestión de Zonas</h3>
+              <span class="more-button" aria-hidden="true">⋮</span>
+            </div>
+            <div class="priority-zone">
+              <iframe
+                title="Mapa de la zona Centro 04 en Bogotá"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=-74.11%2C4.58%2C-74.03%2C4.66&layer=mapnik&marker=4.625%2C-74.07"
+                loading="lazy">
+              </iframe>
+              <div class="zone-alert">
+                <span class="priority-label">● PRIORIDAD ALTA</span>
+                <strong>Zona Centro 04</strong>
+                <span>{{ pendingItemsCount }} pedidos pendientes</span>
+                <span class="zone-status saturated">Atención</span>
+              </div>
+            </div>
+            <article class="zone-row">
+              <span class="zone-icon active-icon" aria-hidden="true">▰</span>
+              <span class="zone-copy"><strong>Norte Industrial</strong><small>Flujo óptimo</small></span>
+              <span class="zone-status active-status">Activa</span>
+            </article>
+            <article class="zone-row">
+              <span class="zone-icon inactive-icon" aria-hidden="true">⊘</span>
+              <span class="zone-copy"><strong>Sur Residencial</strong><small>Fuera de horario</small></span>
+              <span class="zone-status inactive-status">Inactiva</span>
+            </article>
+            <button type="button" class="map-link" (click)="setActiveNav('Mapa de Entregas')">
+              Ver mapa completo <span aria-hidden="true">→</span>
+            </button>
+          </aside>
+        </div>
+      </section>
+
+      <!-- VISTA 2: PANEL DE CONTROL LOGÍSTICO (Cuando el usuario inicia sesión) -->
+      <section *ngIf="authService.isLoggedIn() && isCoordinator && activeNav === 'Pedidos'" class="view-dashboard-container">
+        <div class="dashboard-header-card">
+          <div class="dashboard-user-info">
+            <span class="user-greeting">¡Bienvenido al Panel, {{ authService.currentUser()?.name }}!</span>
+            <span class="user-badge">{{ authService.currentUser()?.roleLabel }}</span>
+            <p class="dashboard-sub">Gestión de rutas activas, despachos y monitoreo de entregas en tiempo real.</p>
+          </div>
+          <button type="button" class="btn-switch-user" (click)="logout()">
+            ← Cerrar Sesión / Volver al Login
+          </button>
+        </div>
+
+        <!-- Métricas KPI -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-icon blue">📦</div>
+            <div class="kpi-data">
+              <span class="kpi-value">{{ items.length }}</span>
+              <span class="kpi-label">Despachos Asignados</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon green">⏱️</div>
+            <div class="kpi-data">
+              <span class="kpi-value">98.4%</span>
+              <span class="kpi-label">Puntualidad en Ruta</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon purple">🗺️</div>
+            <div class="kpi-data">
+              <span class="kpi-value">4 Zonas</span>
+              <span class="kpi-label">Cobertura Activa</span>
+            </div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-icon orange">🛡️</div>
+            <div class="kpi-data">
+              <span class="kpi-value">{{ healthStatus ? 'OK' : 'En línea' }}</span>
+              <span class="kpi-label">Servidor Backend</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Módulo de Gestión de Pedidos en Ruta -->
+        <div class="orders-management-card">
+          <div class="card-title-row">
+            <div>
+              <h3>Gestión de Despachos y Entregas</h3>
+              <p class="card-caption">Sincronizado con la base de datos y API de Express</p>
+            </div>
+            <button type="button" class="btn-refresh" (click)="loadDashboardData()">↻ Actualizar</button>
+          </div>
+
+          <!-- Formulario agregar despacho -->
+          <form class="add-order-form" (ngSubmit)="addItem()">
+            <input 
+              type="text" 
+              [(ngModel)]="newItemTitle" 
+              name="orderTitle"
+              placeholder="Registrar nuevo paquete o entrega (ej: Envío #5091 - Calle 45 #12)..." 
+              class="order-input"
+              required
+            />
+            <select [(ngModel)]="newItemCategory" name="orderCategory" class="order-select">
+              <option value="Urgente">Urgente</option>
+              <option value="Logística">Logística</option>
+              <option value="Estándar">Estándar</option>
+              <option value="Express">Express</option>
+            </select>
+            <button type="submit" class="btn-add-order" [disabled]="!newItemTitle.trim()">
+              + Registrar
+            </button>
+          </form>
+
+          <!-- Listado de Despachos -->
+          <div class="orders-list">
+            <div *ngFor="let item of items" class="order-item" [class.delivered]="item.completed">
+              <div class="order-info">
+                <input 
+                  type="checkbox" 
+                  [checked]="item.completed" 
+                  (change)="toggleItem(item)" 
+                  class="order-check"
+                  title="Marcar como entregado"
+                />
+                <span class="order-title">{{ item.title }}</span>
+                <span class="order-category" [ngClass]="item.category.toLowerCase()">
+                  {{ item.category }}
+                </span>
+                <span *ngIf="item.completed" class="badge-status-done">Entregado</span>
+              </div>
+              <button type="button" class="btn-delete-order" (click)="deleteItem(item.id)" title="Eliminar despacho">
+                ✕
+              </button>
+            </div>
+
+            <div *ngIf="items.length === 0" class="empty-orders">
+              No hay pedidos pendientes en la ruta seleccionada.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section *ngIf="authService.isLoggedIn() && !isCoordinator && activeNav === 'Dashboard'" class="driver-dashboard">
+        <header class="driver-heading">
+          <div>
+            <span class="eyebrow">PANEL DEL CONDUCTOR</span>
+            <h1>Hola, {{ authService.currentUser()?.name }}</h1>
+            <p>{{ authService.currentUser()?.vehicle || 'Tu ruta de entregas para hoy' }}</p>
+          </div>
+          <span class="driver-role">{{ authService.currentUser()?.roleLabel }}</span>
+        </header>
+        <div class="driver-summary">
+          <article><span>Entregas</span><strong>{{ items.length }}</strong></article>
+          <article><span>Pendientes</span><strong>{{ pendingItemsCount }}</strong></article>
+          <article><span>Completadas</span><strong>{{ completedItemsCount }}</strong></article>
+        </div>
+        <section class="driver-route">
+          <div class="card-title-row">
+            <div><h2>Paradas de hoy</h2><p class="card-caption">Actualiza el estado al completar cada entrega.</p></div>
+            <button type="button" class="btn-refresh" (click)="loadDashboardData()">↻ Actualizar</button>
+          </div>
+          <div class="orders-list">
+            <article *ngFor="let item of items; let index = index" class="driver-stop" [class.delivered]="item.completed">
+              <span class="stop-number">{{ index + 1 }}</span>
+              <div class="stop-details"><strong>{{ item.title }}</strong><span>{{ item.category }}</span></div>
+              <label class="stop-complete">
+                <input type="checkbox" [checked]="item.completed" (change)="toggleItem(item)" />
+                <span>{{ item.completed ? 'Entregada' : 'Marcar entregada' }}</span>
+              </label>
+            </article>
+            <div *ngIf="items.length === 0" class="empty-orders">No hay paradas asignadas para hoy.</div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </div>
+</div>
+

@@ -1,0 +1,24 @@
+{
+  "name": "fullstack-node-angular",
+  "version": "1.0.0",
+  "description": "Proyecto Fullstack Node.js + Express con Frontend Angular listo para hosting",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix frontend",
+    "build:frontend": "npm run build --prefix frontend",
+    "build": "npm run build:frontend",
+    "start": "npm start --prefix backend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm start --prefix frontend",
+    "dev": "node -e \"console.log('Para desarrollo: ejecuta \\\"npm run dev:backend\\\" y en otra terminal \\\"npm run dev:frontend\\\"')\""
+  },
+  "keywords": [
+    "nodejs",
+    "express",
+    "angular",
+    "fullstack",
+    "hosting",
+    "docker"
+  ],
+  "author": "",
+  "license": "MIT"
+}
