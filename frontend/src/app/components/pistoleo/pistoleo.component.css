@@ -1,0 +1,51 @@
+.bulk-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ENCABEZADO */
+.bulk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #E2E8F0;
+}
+
+.header-titles .eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #1743B5;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.header-titles h1 {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 6px 0;
+}
+
+.header-titles p {
+  font-size: 14px;
+  color: #64748B;
+  margin: 0;
+  max-width: 650px;
+  line-height: 1.45;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}

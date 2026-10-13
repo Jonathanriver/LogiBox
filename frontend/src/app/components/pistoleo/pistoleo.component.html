@@ -1,0 +1,22 @@
+<div class="bulk-upload-container">
+  <!-- ENCABEZADO PRINCIPAL -->
+  <header class="bulk-header">
+    <div class="header-titles">
+      <span class="eyebrow">IDENTIFICACIÓN Y PISTOLEO</span>
+      <h1>Lectura de codigos de barras</h1>
+      <p>Usa la pistola para leer el codigo de barras de cada pedido y obtener el numero que se le asigno porcada ruta.</p>
+    </div>
+
+  </header>
+
+  <!-- MENSAJES DE ALERTA -->
+  <div class="alert-box error" *ngIf="errorMessage" role="alert">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="12" cy="12" r="10"></circle>
+      <line x1="12" y1="8" x2="12" y2="12"></line>
+      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+    </svg>
+    <span>{{ errorMessage }}</span>
+  </div>
+</div>
+

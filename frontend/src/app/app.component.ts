@@ -8,11 +8,12 @@ import { AuthService } from './services/auth.service';
 import { ApiService } from './services/api.service';
 import { User } from './models/auth.model';
 import { Item, HealthStatus } from './models/item.model';
+import { PistoleoComponent } from './components/pistoleo/pistoleo.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule, LoginComponent, ZoneManagementComponent, BulkUploadComponent],
+  imports: [CommonModule, FormsModule, LoginComponent, ZoneManagementComponent, BulkUploadComponent, PistoleoComponent],
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit {
